@@ -3787,6 +3787,7 @@ namespace Breeze
 
         const auto& palette( option->palette );
         const bool hasAlpha( _helper->hasAlphaChannel( widget ) );
+        const bool isTopMenu( widget != nullptr && widget->property(PropertyNames::isTopMenu).toBool() );
         auto background( _helper->frameBackgroundColor( palette ) );
         auto outline( _helper->frameOutlineColor( palette ) );
 
@@ -3800,7 +3801,7 @@ namespace Breeze
             outline = _helper->alphaColor( palette.color( QPalette::WindowText ), 0.25 );
         }
 
-        _helper->renderMenuFrame( painter, option->rect, background, outline, hasAlpha );
+        _helper->renderMenuFrame( painter, option->rect, background, outline, hasAlpha, isTopMenu );
 
         painter->restore();
         
@@ -4861,7 +4862,7 @@ namespace Breeze
             Sides sides = nullptr;
             if( !menuItemOption->menuRect.isNull() )
             {
-                if( rect.top() <= menuItemOption->menuRect.top() ) sides |= SideTop;
+                if( rect.top() <= menuItemOption->menuRect.top() && !(widget && widget->property(PropertyNames::isTopMenu).toBool()) ) sides |= SideTop;
                 if( rect.bottom() >= menuItemOption->menuRect.bottom() ) sides |= SideBottom;
                 if( rect.left() <= menuItemOption->menuRect.left() ) sides |= SideLeft;
                 if( rect.right() >= menuItemOption->menuRect.right() ) sides |= SideRight;

@@ -22,6 +22,7 @@
 
 #include <KConfigGroup>
 #include <KColorUtils>
+#include <KWindowSystem>
 #include <KSharedConfig>
 #include <KPluginFactory>
 
@@ -548,6 +549,20 @@ namespace Breeze
         auto c = client().data();
         auto s = settings();
 
+        if (painter->device()->devicePixelRatioF() != m_devicePixelRatio) {
+            m_devicePixelRatio = painter->device()->devicePixelRatioF();
+            updateShadow();
+        }
+
+        if (KWindowSystem::isPlatformX11()) {
+            auto config = KSharedConfig::openConfig(QStringLiteral("kdeglobals"));
+            auto scale = config->group("KScreen").readEntry("ScaleFactor", 1.0);
+            if (!qFuzzyCompare(scale, m_devicePixelRatio)) {
+                m_devicePixelRatio = scale;
+                updateShadow();
+            }
+        }
+
         // paint background
         if( !c->isShaded() )
         {
@@ -784,7 +799,7 @@ namespace Breeze
           BoxShadowRenderer shadowRenderer;
           shadowRenderer.setBorderRadius(Metrics::Frame_FrameRadius + 0.5);
           shadowRenderer.setBoxSize(boxSize);
-          shadowRenderer.setDevicePixelRatio(1.0); // TODO: Create HiDPI shadows?
+          shadowRenderer.setDevicePixelRatio(m_devicePixelRatio);
 
           const qreal strength = internalSettings->shadowStrength() / 255.0 * strengthScale;
           shadowRenderer.addShadow(params.shadow1.offset, params.shadow1.radius,
@@ -820,6 +835,12 @@ namespace Breeze
 
           // Draw outline.
           painter.setPen(withOpacity(internalSettings->shadowColor(), 0.2 * strength));
+
+          if (KWindowSystem::isPlatformX11()) {
+              auto p = painter.pen();
+              p.setWidthF(m_devicePixelRatio);
+              painter.setPen(p);
+          }
           painter.setBrush(Qt::NoBrush);
           painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
           painter.drawRoundedRect(

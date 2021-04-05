@@ -10,6 +10,13 @@
                          src = ./.;
                          installPhase = "mv cursors/Breeze/Breeze $out";
                        };
+
+                   breeze-snow =
+                     mkDerivation
+                       { name = "Breeze_Snow";
+                         src = ./.;
+                         installPhase = "mv cursors/Breeze_Snow/Breeze_Snow $out";
+                       };
                  };
              };
          }

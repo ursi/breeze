@@ -1,10 +1,11 @@
 { outputs = { nixpkgs, utils, ...}:
     utils.defaultSystems
       ({ pkgs, ... }:
+         let inherit (pkgs.stdenv) mkDerivation; in
          { packages =
              { cursors =
-                 { breeze = with pkgs;
-                     stdenv.mkDerivation
+                 { breeze =
+                     mkDerivation
                        { name = "Breeze";
                          src = ./.;
                          installPhase = "mv cursors/Breeze/Breeze $out";
